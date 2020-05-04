@@ -15,21 +15,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void btnListView_clicked(View view) {
+        //해당 Activity 로 넘어감
         Intent intent = new Intent(this, ListViewActivity.class);
         startActivity(intent);
     }
 
     public void btnRecyclerView1_clicked(View view) {
+        //해당 Activity 로 넘어감
         Intent intent = new Intent(this, RecyclerView1Activity.class);
         startActivity(intent);
     }
 
     public void btnRecyclerView2_clicked(View view) {
+        //해당 Activity 로 넘어감
         Intent intent = new Intent(this, RecyclerView2Activity.class);
         startActivity(intent);
     }
 
     public void btnRecyclerView3_clicked(View view) {
+        //해당 Activity 로 넘어감
         Intent intent = new Intent(this, RecyclerView3Activity.class);
         startActivity(intent);
     }

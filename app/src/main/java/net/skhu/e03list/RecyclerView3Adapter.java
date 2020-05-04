@@ -16,81 +16,98 @@ import java.util.ArrayList;
 
 public class RecyclerView3Adapter extends RecyclerView.Adapter<RecyclerView3Adapter.ViewHolder> {
 
-    class ViewHolder extends RecyclerView.ViewHolder
-            implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
+    class ViewHolder extends RecyclerView.ViewHolder//평범한 class로 리스너 구현 가능
+            implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {//리스너 ViewHolder에서 구현//data 항목 1개에 대한 리스너는 ViewHolder에 몰아서 구현
         TextView textView1, textView2;
         CheckBox checkBox;
 
-        public ViewHolder(View view) {
+        //데이터가 항목마다 다르기 때문에,  ViewHolder 필요, 어떤 data에 있는 textView에 대해 findViewById 합니다.
+        public ViewHolder(View view) {//ViewHolder 사용하는 이유는 findViewById등을 하기 위함입니다. 그리고 각 리스너도 등록합니다.
             super(view);
+
+            //참고로 여기서 view 는 해당 항목의 view입니다. 그래서 다른 항목의 view하고는 전혀 다른 겁니다.
             textView1 = view.findViewById(R.id.textView1);
             textView2 = view.findViewById(R.id.textView2);
             checkBox = view.findViewById(R.id.checkBox);
-            textView1.setOnClickListener(this);
+            textView1.setOnClickListener(this);//여기서 리스너로 자기 자신을 등록하는 이유는, implements View.OnClickListener, CompoundButton.OnCheckedChangeListener 했기 때문입니다.
+            //View의 개수와 ViewHolder의 개수 같아야 됩니다. listener 개수도 다 같아야 합니다. listener 객체와 ViewHolder 의 개수를 갖게하는 방법, 이 객체가 ViewHolder이자 listener 이면 됩니다.
+            //listener 개수 == ViewHolder 개수 하려면, 이 객체가 ViewHolder이자 listener 이면 됩니다.
             checkBox.setOnCheckedChangeListener(this);
         }
 
-        public void setData() {
-            Memo memo = arrayList.get(getAdapterPosition());
+        public void setData() {//데이터를 채우는 함수입니다.
+            Memo memo = arrayList.get(getAdapterPosition());//arrayList로부터 해당 요소 데이터 가져옵니다.
+
+            //각 view를 데이터에 맞게 채워줍니다.
             textView1.setText(memo.getTitle());
             textView2.setText(memo.getDateFormatted());
             checkBox.setChecked(memo.isChecked());
         }
 
         @Override
-        public void onClick(View view) {
-            int index = super.getAdapterPosition();
-            RecyclerView3Activity activity = (RecyclerView3Activity) textView1.getContext();
-            activity.memoIndex = index;
-            Memo memo = arrayList.get(index);
+        public void onClick(View view) {//해당 항목이 클릭되었을 때의 리스너입니다.
+            int index = super.getAdapterPosition();//선택된 항목의 인덱스를 저장
+            RecyclerView3Activity activity = (RecyclerView3Activity) textView1.getContext();//부모 Activity 를 얻는 쉬운 방법은, View 아무거나 선택해서 .getContext() 하고, 해당 Activity 로 형 변환합니다.
+            //startActivityForResult 등을 호출해야 하기 때문에, 현제 Activity 가져왔습니다.
+
+            activity.memoIndex = index;//현제 선택된 항목의 index를 부모 Activity의 멤버 변수에 저장합니다. 몇번 항목 수정 중이다, 그래야 arrayList 에서 update 가 가능합니다.
+            Memo memo = arrayList.get(index);//해당 memo 객체를 가져옵니다.
+
+            //MemoActivity으로 넘어가도록 해주었습니다.
             Intent intent = new Intent(activity, MemoActivity.class);
-            intent.putExtra("MEMO", memo);
-            activity.startActivityForResult(intent, RecyclerView3Activity.REQUEST_EDIT);
+            intent.putExtra("MEMO", memo);//MemoActivity 에 memo 객체를 data 전송했습니다.
+            activity.startActivityForResult(intent, RecyclerView3Activity.REQUEST_EDIT);//리턴 받을 때 구분을 위해서, activity.startActivityForResult로 RecyclerView3Activity.REQUEST_EDIT을 인자전달 했습니다.
+            //여기서 RecyclerView3Activity.REQUEST_EDIT이기 때문에, 수정 목적으로 넘어가는 겁니다.
+            //activity.startActivityForResult 는 RecyclerView3Activity 클래스의 메소드 입니다.
         }
 
         @Override
-        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-            Memo memo = arrayList.get(super.getAdapterPosition());
-            memo.setChecked(isChecked);
-            if (isChecked) ++checkedCount;
-            else --checkedCount;
-            if (isChecked && checkedCount == 1 || !isChecked && checkedCount == 0) {
-                Activity activity = (Activity) textView1.getContext();
-                activity.invalidateOptionsMenu();
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {//체크 상태가 변할 때의 리스너
+            Memo memo = arrayList.get(super.getAdapterPosition());//클릭된 항목의 데이터를 arrayList로부터 가져왔습니다.
+            memo.setChecked(isChecked);//memo의 현제 체크 상태를 체크 박스의 체크상태와 맞추어 주었습니다.
+            if (isChecked) ++checkedCount;//현제 체크가 된 거면, 체크 상테인 항목이 한개 증가한 것이여서  ++checkedCount 해주었습니다.
+            else --checkedCount;//현제 체크가 해제된 거면, 체크 상테인 항목이 한개 감소한 것이여서  --checkedCount 해주었습니다.
+            if (isChecked && checkedCount == 1 || !isChecked && checkedCount == 0) {//항목이 0->1 일 때와 1-> 일 때 메뉴를 다시 그리도록 해주었습니다.
+                Activity activity = (Activity) textView1.getContext();//부모 Activity를 얻는 쉬운 방법입니다. 아무 view 에서 getContext()한 다음에, 해당 Activity로 형변환하면 됩니다.
+                activity.invalidateOptionsMenu();//메뉴를 다시 그래도록 해주었습니다.
             }
         }
     }
 
     LayoutInflater layoutInflater;
     ArrayList<Memo> arrayList;
-    int checkedCount = 0;
-
-    public int getCheckedCount() {
-        return checkedCount;
-    }
+    int checkedCount = 0;//체크된 항목 개수 저장
 
     public void setCheckedCount(int checkedCount) {
         this.checkedCount = checkedCount;
     }
 
-    public RecyclerView3Adapter(Context context, ArrayList<Memo> arrayList) {
-        this.layoutInflater = LayoutInflater.from(context);
-        this.arrayList = arrayList;
+    public int getCheckedCount() {
+        return checkedCount;
+    }
+
+    public RecyclerView3Adapter(Context context, ArrayList<Memo> arrayList) {//RecyclerView1Adapter 생성자(Constructor)
+        this.layoutInflater = LayoutInflater.from(context);//layout inflate
+        this.arrayList = arrayList;//목록의 arrayList
     }
 
     @Override
-    public int getItemCount() {
+    public int getItemCount() {//크기 반환
         return arrayList.size();
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
-        View view = layoutInflater.inflate(R.layout.memo2, viewGroup, false);
-        return new ViewHolder(view);
+    public RecyclerView3Adapter.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {//ViewHolder 만들 때의 호출되는 함수입니다.
+        View view = layoutInflater.inflate(R.layout.memo2, viewGroup, false);//R.layout.memo2 대로 그려주었습니다.
+        //viewGroup은 RecyclerView입니다.
+        //View가 만들어져서, rootView가 만들어진 것입니다.
+
+        return new RecyclerView3Adapter.ViewHolder(view);//ViewHolder만들어서 리턴, 위의 ViewHolder 생성자(Constructor)가 호출된 것. 확인하고 싶으면, ctrl+클릭
+        //만들어진 View객체를 ViewHolder 에 넣어야 하니까 이렇게 return 한 것입니다.
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder viewHolder, final int index) {
-        viewHolder.setData();
+    public void onBindViewHolder(final RecyclerView3Adapter.ViewHolder viewHolder, final int index) {//데이터를 할당하는 함수, 데이터 세팅하는 함수
+        viewHolder.setData();//해당 viewHolder의 데이터를 채워주었습니다.
     }
 }
