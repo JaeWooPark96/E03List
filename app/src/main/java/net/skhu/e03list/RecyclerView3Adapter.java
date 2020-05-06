@@ -3,6 +3,7 @@ package net.skhu.e03list;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,21 +49,8 @@ public class RecyclerView3Adapter extends RecyclerView.Adapter<RecyclerView3Adap
 
         @Override
         public void onClick(View view) {//해당 항목이 클릭되었을 때의 리스너입니다.
-            /*int index = super.getAdapterPosition();//선택된 항목의 인덱스를 저장
-            RecyclerView3Activity activity = (RecyclerView3Activity) textView1.getContext();//부모 Activity 를 얻는 쉬운 방법은, View 아무거나 선택해서 .getContext() 하고, 해당 Activity 로 형 변환합니다.
-            //startActivityForResult 등을 호출해야 하기 때문에, 현제 Activity 가져왔습니다.
 
-            activity.memoIndex = index;//현제 선택된 항목의 index를 부모 Activity의 멤버 변수에 저장합니다. 몇번 항목 수정 중이다, 그래야 arrayList 에서 update 가 가능합니다.
-            Memo memo = arrayList.get(index);//해당 memo 객체를 가져옵니다.
-
-            //MemoActivity으로 넘어가도록 해주었습니다.
-            Intent intent = new Intent(activity, MemoActivity.class);
-            intent.putExtra("MEMO", memo);//MemoActivity 에 memo 객체를 data 전송했습니다.
-            activity.startActivityForResult(intent, RecyclerView3Activity.REQUEST_EDIT);//리턴 받을 때 구분을 위해서, activity.startActivityForResult로 RecyclerView3Activity.REQUEST_EDIT을 인자전달 했습니다.
-            //여기서 RecyclerView3Activity.REQUEST_EDIT이기 때문에, 수정 목적으로 넘어가는 겁니다.
-            //activity.startActivityForResult 는 RecyclerView3Activity 클래스의 메소드 입니다.*/
-
-            int index = super.getAdapterPosition();
+            selectedIndex = super.getAdapterPosition();
             //listener.onMemoClicked(index);//Lambda Expressions 으로 구현된 함수에 인자전달 해주었습니다.
             onMemoClickListener.onMemoClicked(arrayList.get(selectedIndex));//Lambda Expressions 으로 구현된 함수에 인자전달 해주었습니다.
             //이렇게 해서 RecyclerView3Adapter 는 다른 class 를 참조하지 않는다.
@@ -74,12 +62,15 @@ public class RecyclerView3Adapter extends RecyclerView.Adapter<RecyclerView3Adap
             memo.setChecked(isChecked);//memo의 현제 체크 상태를 체크 박스의 체크상태와 맞추어 주었습니다.
             if (isChecked) ++checkedCount;//현제 체크가 된 거면, 체크 상테인 항목이 한개 증가한 것이여서  ++checkedCount 해주었습니다.
             else --checkedCount;//현제 체크가 해제된 거면, 체크 상테인 항목이 한개 감소한 것이여서  --checkedCount 해주었습니다.
-            /*if (isChecked && checkedCount == 1 || !isChecked && checkedCount == 0) {//항목이 0->1 일 때와 1-> 일 때 메뉴를 다시 그리도록 해주었습니다.
-                Activity activity = (Activity) textView1.getContext();//부모 Activity를 얻는 쉬운 방법입니다. 아무 view 에서 getContext()한 다음에, 해당 Activity로 형변환하면 됩니다.
-                activity.invalidateOptionsMenu();//메뉴를 다시 그래도록 해주었습니다.
-            }*/
+
+            if (checkedCount < 0){//전체 삭제하면, -1되서, 0으로 다시 맞추어 주었습니다.
+                checkedCount = 0;
+            }
+
             onCheckCountChangeListener.onCheckCountChanged(checkedCount);//Lambda Expressions 으로 구현된 함수에 인자전달 해주었습니다.
             //이렇게 해서 RecyclerView3Adapter 는 다른 class 를 참조하지 않는다.
+
+            Log.v("pjw", "onCheckedChanged! checkedCount: "+checkedCount);
         }
     }
 
@@ -148,10 +139,15 @@ public class RecyclerView3Adapter extends RecyclerView.Adapter<RecyclerView3Adap
     //목록 관리 함수
     public void removeCheckedMemo() {//제거할 때, RecyclerView3Adapter 멤버 변수에서 제거합니다.
         ListIterator<Memo> iterator = arrayList.listIterator();
-        while (iterator.hasNext())
-            if (iterator.next().isChecked())
+        while (iterator.hasNext()) {
+            if (iterator.next().isChecked()) {
                 iterator.remove();
+            }
+        }
         notifyDataSetChanged();
+
+        checkedCount = 0;
+        onCheckCountChangeListener.onCheckCountChanged(checkedCount);//Lambda Expressions 으로 구현된 함수에 인자전달 해주었습니다.
     }
 
 }

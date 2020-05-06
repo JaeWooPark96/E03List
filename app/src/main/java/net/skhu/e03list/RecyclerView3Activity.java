@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -35,18 +36,6 @@ public class RecyclerView3Activity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recycler_view3);
 
-        //editText = (EditText) findViewById(R.id.editText);
-
-        /*recyclerView3Adapter = new RecyclerView3Adapter(this, arrayList, new OnMemoClickListener() {
-            @Override
-            public void onMemoClicked(int index) {
-                memoIndex = index;
-                startMemoActivityForResult(REQUEST_EDIT, arrayList.get(index));
-            }
-        });//RecyclerView3Adapter 생성, 우리가 만들어준 Adapter를 생성한 것입니다.
-
-         */
-
         //RecyclerView3Adapter 생성, 우리가 만들어준 Adapter를 생성한 것입니다.
         recyclerView3Adapter = new RecyclerView3Adapter(this,
                 (memo) -> startMemoActivityForResult(REQUEST_EDIT, memo),//Lambda Expressions 함수 주의 사항은,  여기선  우리가 정의한 Interface 와 매개변수등 맞추어서 코딩해야 한다는 점입니다.
@@ -61,19 +50,6 @@ public class RecyclerView3Activity extends AppCompatActivity {
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(recyclerView3Adapter);//recyclerView에 recyclerView3Adapter를 등록해주었습니다.
 
-        /*//ok 버튼 (추가버튼) 을 찾아서, 리스너를 등록해주었습니다.
-        //버튼이 눌리면, EditText의 내용을 arrayList에 저장하고 recyclerView2Adapter로 recyclerView를 다시 그려주도록 했습니다.
-        Button b = (Button)findViewById(R.id.btnAdd);
-        b.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View arg0) {
-                String s = editText.getText().toString();//editText의 내용을 가져왔습니다.
-                editText.setText("");
-                arrayList.add(new Memo(s, new Date()));//arrayList에 해당 내용을 추가해주었습니다.
-                //여기서 editText의 내용, new Date()를 추가해주었습니다.(현재 시간으로 추가해주었습니다.)
-                recyclerView3Adapter.notifyDataSetChanged();//recyclerView2Adapter로 recyclerView를 다시 그려주도록 했습니다.
-            }
-        });*/
     }
 
     @Override
@@ -83,6 +59,8 @@ public class RecyclerView3Activity extends AppCompatActivity {
         //체크된 항목 있어야, 삭제 메뉴 보이도록 해주었습니다.
         MenuItem menuItem = menu.findItem(R.id.action_remove);//삭제 메뉴 객체를 찾아줍니다.
         menuItem.setVisible(recyclerView3Adapter.getCheckedCount() > 0);//현제 recyclerView2Adapter로, RecyclerView에 체크된 항목이 없으면, 삭제 메뉴가 안보이도록 해주었습니다.
+        Log.v("pjw", "recyclerView3Adapter.getCheckedCount(): "+recyclerView3Adapter.getCheckedCount());
+
         return true;
     }
 
@@ -126,32 +104,6 @@ public class RecyclerView3Activity extends AppCompatActivity {
             recyclerView3Adapter.notifyDataSetChanged();//RecyclerView를 다시그려주었습니다.
         }
     }
-
-   /* private void deleteItems() {//체크된 항목을 삭제하도록 하는 함수입니다.
-        //dialog로 삭제여부를 물어봤습니다.
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.confirm);
-        builder.setMessage(R.string.doYouWantToDelete);
-        builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {//예 버튼을 누를 때 listener
-            @Override
-            public void onClick(DialogInterface dialog, int index) {
-                ListIterator<Memo> iterator = arrayList.listIterator();//arrayList로부터 iterator를 얻어주었습니다.
-                //iterator는 포인터라고 보시면 됩니다. 해당 요소 주소를 저장합니다.
-                while (iterator.hasNext()) {//다음 iterator가 없을 때까지 반복합니다.
-                    if (iterator.next().isChecked()) {//미리 다음 iterator로 넘어가기 때문에, 문제없이 작동합니다. iterator를 사용하기 때문에, arrayList요소의 동시 접근을 막을 수 있다.
-                        // arrayList.remove()를 사용해서 for문 돌리면, 잘못하면, 한 요소에 동시접근할 수 있다.
-                        iterator.remove();//iterator 객체 삭제
-                    }
-                }
-
-                //삭제 완료후 RecyclerView 다시 그려주었습니다.
-                recyclerView3Adapter.notifyDataSetChanged();
-            }
-        });
-        builder.setNegativeButton(R.string.no, null);//아니오 버튼
-        AlertDialog dialog = builder.create();//AlertDialog 생성
-        dialog.show();//AlertDialog를 보여주었습니다.
-    }*/
 
     //MemoActivity 를 호출하는 함수를, RecyclerView3Activity 한 곳에 모으기 위해서 이렇게 했습니다.//다른 Activity 를 호출하는 코드는 액티비티 내부에 구현//RecyclerView3Adapter 는 Activity 를 참조하지 않는 게 좋다.
     private void startMemoActivityForResult(int requestCode, Memo memo) {//requestCode와 Memo 객체로 intent하는 함수입니다.
